@@ -1,0 +1,341 @@
+[
+    {
+        "id": "8d5fe526.e87248",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "ef358bec.bd8948",
+        "type": "http response",
+        "z": "8d5fe526.e87248",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 770,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "a055f07f.3ed55",
+        "type": "function",
+        "z": "8d5fe526.e87248",
+        "name": "セッションIDをセットしてAlexaへ渡すJSONを生成する",
+        "func": "var resobj = \n{\n//    \"body\": {\n\t\t\"version\": \"1.0\",\n\t\t\"response\": {\n\t\t\t\"outputSpeech\": {\n\t\t\t\t\"type\": \"SSML\",\n\t\t\t\t\"ssml\": \"\"\n\t\t\t},\n\t\t\t\"shouldEndSession\": \"\" //true\n\t\t},\n\t\t\"sessionAttributes\": {\n\t\t    \"string\": \"\"\n\t\t}\n//\t}\n}\n;\n\nvar msgStr=\"\";\nif (msg.payload.message === undefined) {\n  msgStr = msg.payload;\n}else{\n  msgStr = msg.payload.message;\n}\nresobj.response.outputSpeech.ssml = '<speak>' + msgStr + '</speak>'\nresobj.sessionAttributes.string = 'amzn1.echo-api.session.' + msg.user\nresobj.response.shouldEndSession = msg.context\n\nmsg.payload = resobj;\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 370,
+        "y": 600,
+        "wires": [
+            [
+                "d4f471f3.77bdd",
+                "ef358bec.bd8948"
+            ]
+        ]
+    },
+    {
+        "id": "719dd073.ae143",
+        "type": "function",
+        "z": "8d5fe526.e87248",
+        "name": "応答文を取り出す",
+        "func": "\nmsg.payload = msg.payload.output.text[0];\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 190,
+        "y": 340,
+        "wires": [
+            [
+                "e32c0f66.9ff48"
+            ]
+        ]
+    },
+    {
+        "id": "d4f471f3.77bdd",
+        "type": "debug",
+        "z": "8d5fe526.e87248",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 790,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "c9397421.ac31c8",
+        "type": "watson-conversation-v1",
+        "z": "8d5fe526.e87248",
+        "name": "AlexaWatsonを呼び出す",
+        "workspaceid": "<ご自身のワークスペースIDを設定してください>",
+        "multiuser": true,
+        "context": true,
+        "empty-payload": true,
+        "default-endpoint": true,
+        "service-endpoint": "https://gateway.watsonplatform.net/conversation/api",
+        "timeout": "",
+        "optout-learning": false,
+        "x": 390,
+        "y": 280,
+        "wires": [
+            [
+                "c64462df.0e859",
+                "719dd073.ae143"
+            ]
+        ]
+    },
+    {
+        "id": "7a5e0ef3.19ad3",
+        "type": "debug",
+        "z": "8d5fe526.e87248",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "complete": "payload",
+        "x": 810,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "eeb981e9.799ad",
+        "type": "function",
+        "z": "8d5fe526.e87248",
+        "name": "Intentを振り分ける（起動・停止発話と通常の発話）",
+        "func": "\nif (msg.req.body.request.type==\"LaunchRequest\") {\nmsg.payload=\"LaunchRequest\"\nmsg.context=\"false\"\n} \nelse if (msg.req.body.request.intent.name==\"AMAZON.StopIntent\") {\nmsg.payload=\"StopRequest\"\nmsg.context=\"true\"\n}\nelse if (msg.req.body.request.intent.name==\"AMAZON.CancelIntent\") {\nmsg.payload=\"StopRequest\"\nmsg.context=\"true\"\n}\nelse {\nTargetString = msg.req.body.request.intent.slots.EveryThingSlot.value\nTargetString = TargetString.replace(/\\s+/g, \"\")\nmsg.payload=TargetString\nmsg.context=\"false\"\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 200,
+        "wires": [
+            [
+                "e6696e6f.5f7d",
+                "c9397421.ac31c8"
+            ]
+        ]
+    },
+    {
+        "id": "c64462df.0e859",
+        "type": "debug",
+        "z": "8d5fe526.e87248",
+        "name": "",
+        "active": false,
+        "console": "false",
+        "complete": "payload",
+        "x": 630,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "e6696e6f.5f7d",
+        "type": "debug",
+        "z": "8d5fe526.e87248",
+        "name": "",
+        "active": false,
+        "console": "false",
+        "complete": "payload",
+        "x": 630,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "3fe69e39.11a432",
+        "type": "function",
+        "z": "8d5fe526.e87248",
+        "name": "AlexaのセッションIDを取り出す",
+        "func": "msg.payload=msg.req.body\nvar sourceSessionId = msg.req.body.session.sessionId\nvar sessionId = sourceSessionId.replace( \"amzn1.echo-api.session.\" , \"\" ) ;\nmsg.user=sessionId\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 210,
+        "y": 120,
+        "wires": [
+            [
+                "3d47ad4d.ff00a2",
+                "eeb981e9.799ad"
+            ]
+        ]
+    },
+    {
+        "id": "d0e13111.09577",
+        "type": "http in",
+        "z": "8d5fe526.e87248",
+        "name": "rest api",
+        "url": "/reception",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 70,
+        "y": 40,
+        "wires": [
+            [
+                "3fe69e39.11a432"
+            ]
+        ]
+    },
+    {
+        "id": "3d47ad4d.ff00a2",
+        "type": "debug",
+        "z": "8d5fe526.e87248",
+        "name": "",
+        "active": false,
+        "console": "false",
+        "complete": "payload",
+        "x": 450,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "e32c0f66.9ff48",
+        "type": "switch",
+        "z": "8d5fe526.e87248",
+        "name": "Assistantからの応答により分岐",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "checkin",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "checkout",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 310,
+        "y": 400,
+        "wires": [
+            [
+                "312f4b5b.0ea204"
+            ],
+            [
+                "73154853.2b2688"
+            ],
+            [
+                "a055f07f.3ed55",
+                "a129eb25.c1ee08"
+            ]
+        ]
+    },
+    {
+        "id": "ee4c227a.854f3",
+        "type": "openwhisk-action",
+        "z": "8d5fe526.e87248",
+        "name": "",
+        "func": "",
+        "namespace": "fillgapapp02@fillgap.jp_1532612733939_dev",
+        "action": "callReceptionist",
+        "params": [
+            {
+                "disabled": true
+            }
+        ],
+        "service": "3d07f0f4.81d7b",
+        "edit": false,
+        "x": 400,
+        "y": 520,
+        "wires": [
+            [
+                "7a5e0ef3.19ad3",
+                "a055f07f.3ed55"
+            ]
+        ]
+    },
+    {
+        "id": "312f4b5b.0ea204",
+        "type": "change",
+        "z": "8d5fe526.e87248",
+        "name": "Check InのパラメーターをFunctionへ",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"purpose\": \"checkin\"}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 710,
+        "y": 320,
+        "wires": [
+            [
+                "ee4c227a.854f3",
+                "dd278d7f.c64bd"
+            ]
+        ]
+    },
+    {
+        "id": "73154853.2b2688",
+        "type": "change",
+        "z": "8d5fe526.e87248",
+        "name": "Check OutのパラメーターをFunctionへ",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"purpose\": \"checkout\"}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 720,
+        "y": 360,
+        "wires": [
+            [
+                "ee4c227a.854f3"
+            ]
+        ]
+    },
+    {
+        "id": "dd278d7f.c64bd",
+        "type": "debug",
+        "z": "8d5fe526.e87248",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 830,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "a129eb25.c1ee08",
+        "type": "debug",
+        "z": "8d5fe526.e87248",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 640,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "3d07f0f4.81d7b",
+        "type": "openwhisk-service",
+        "z": "",
+        "name": "",
+        "api": "https://openwhisk.ng.bluemix.net/api/v1"
+    }
+]

@@ -1,0 +1,200 @@
+{
+  "name": "alec-san-app",
+  "intents": [
+    {
+      "intent": "Reception",
+      "examples": [
+        {
+          "text": "こんにちは"
+        },
+        {
+          "text": "受付してください"
+        },
+        {
+          "text": "誰かいませんか"
+        },
+        {
+          "text": "どうもです"
+        },
+        {
+          "text": "すみません"
+        },
+        {
+          "text": "ごめんください"
+        }
+      ],
+      "description": ""
+    },
+    {
+      "intent": "LaunchRequest",
+      "examples": [],
+      "description": ""
+    },
+    {
+      "intent": "Checkin",
+      "examples": [
+        {
+          "text": "チェックインしたいです"
+        },
+        {
+          "text": "チェックインできますか"
+        },
+        {
+          "text": "予約してるのですが"
+        },
+        {
+          "text": "空いてますか？"
+        }
+      ],
+      "description": ""
+    },
+    {
+      "intent": "StopRequest",
+      "examples": [],
+      "description": ""
+    },
+    {
+      "intent": "Checkout",
+      "examples": [
+        {
+          "text": "チェックアウトできますか"
+        },
+        {
+          "text": "チェックアウトしたいのですが"
+        },
+        {
+          "text": "帰ります"
+        }
+      ],
+      "description": ""
+    }
+  ],
+  "entities": [],
+  "language": "ja",
+  "metadata": {
+    "api_version": {
+      "major_version": "v1",
+      "minor_version": "2018-09-20"
+    }
+  },
+  "description": "",
+  "dialog_nodes": [
+    {
+      "type": "standard",
+      "title": "チェックアウト",
+      "output": {
+        "text": {
+          "values": [
+            "checkout"
+          ],
+          "selection_policy": "sequential"
+        }
+      },
+      "parent": "node_2_1543387949704",
+      "metadata": {},
+      "conditions": "#Checkout",
+      "dialog_node": "node_5_1543388034348",
+      "previous_sibling": "node_4_1543387993522"
+    },
+    {
+      "type": "standard",
+      "title": "チェックイン",
+      "output": {
+        "text": {
+          "values": [
+            "checkin"
+          ],
+          "selection_policy": "sequential"
+        }
+      },
+      "parent": "node_2_1543387949704",
+      "metadata": {},
+      "conditions": "#Checkin",
+      "dialog_node": "node_4_1543387993522"
+    },
+    {
+      "type": "standard",
+      "title": "会話",
+      "output": {
+        "text": {
+          "values": [
+            "チェックインですか？チェックアウトですか？"
+          ],
+          "selection_policy": "sequential"
+        }
+      },
+      "metadata": {},
+      "conditions": "#Reception",
+      "dialog_node": "node_2_1543387949704",
+      "previous_sibling": "node_1_1543387925207"
+    },
+    {
+      "type": "standard",
+      "title": "終了",
+      "output": {
+        "text": {
+          "values": [
+            "ありがとうございました"
+          ],
+          "selection_policy": "sequential"
+        }
+      },
+      "metadata": {},
+      "conditions": "#StopRequest",
+      "dialog_node": "node_3_1543387972946",
+      "previous_sibling": "node_2_1543387949704"
+    },
+    {
+      "type": "standard",
+      "title": "その他",
+      "output": {
+        "text": {
+          "values": [
+            "解釈できませんでした。申し訳ありませんが違う表現を試していただけますか。",
+            "恐れ入りますが表現を変えていただけますか。解釈できませんでした。"
+          ],
+          "selection_policy": "sequential"
+        }
+      },
+      "metadata": {},
+      "conditions": "anything_else",
+      "dialog_node": "その他",
+      "previous_sibling": "node_3_1543387972946"
+    },
+    {
+      "type": "standard",
+      "title": "起動",
+      "output": {
+        "text": {
+          "values": [
+            "私はホテルの受付アレクさんです"
+          ],
+          "selection_policy": "sequential"
+        }
+      },
+      "metadata": {},
+      "conditions": "#LaunchRequest",
+      "dialog_node": "node_1_1543387925207",
+      "previous_sibling": "ようこそ"
+    },
+    {
+      "type": "standard",
+      "title": "ようこそ",
+      "output": {
+        "text": {
+          "values": [
+            "いらっしゃいませ。ご用件を入力してください。"
+          ],
+          "selection_policy": "sequential"
+        }
+      },
+      "metadata": {},
+      "conditions": "welcome",
+      "dialog_node": "ようこそ"
+    }
+  ],
+  "workspace_id": "f4ae148b-fe99-4ea7-8899-e438cf1256f6",
+  "counterexamples": [],
+  "learning_opt_out": false,
+  "status": "Available"
+}
